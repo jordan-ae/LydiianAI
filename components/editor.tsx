@@ -17,7 +17,6 @@ export function Editor() {
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
-        // Ensure all extensions are properly configured
         heading: {
           levels: [1, 2, 3],
         },

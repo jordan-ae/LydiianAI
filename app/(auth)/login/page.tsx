@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Github } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { supabase } from "@/lib/supabase-client"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -24,13 +25,19 @@ export default function LoginPage() {
     setIsLoading(true)
 
     try {
-      // In a real app, you would use Supabase auth here
-      // const { error } = await supabase.auth.signInWithPassword({
-      //   email,
-      //   password,
-      // });
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email,
+        password: password,
+      })
 
-      // if (error) throw error;
+      if (data.session) {
+        localStorage.setItem('accessToken', data.session.access_token)
+        localStorage.setItem('token_type', data.session.token_type)
+        localStorage.setItem('expires_in', data.session.expires_in.toString())
+        localStorage.setItem('expires_at', data.session?.expires_at?.toString() || '')
+        localStorage.setItem('refresh_token', data.session.refresh_token)
+        localStorage.setItem('user', JSON.stringify(data.user))
+      }
 
       toast({
         title: "Success",
@@ -53,13 +60,8 @@ export default function LoginPage() {
     setIsLoading(true)
 
     try {
-      // In a real app, you would use Supabase auth here
-      // const { error } = await supabase.auth.signInWithOAuth({
-      //   provider: provider as Provider,
-      // });
-
-      // if (error) throw error;
-
+      const { data, error } = await supabase.auth.signInWithOAuth({  provider: 'google',  options: {    redirectTo: 'http://example.com/auth/callback',  },})
+      
       toast({
         title: "Redirecting",
         description: `Redirecting to ${provider} for authentication.`,
@@ -118,7 +120,7 @@ export default function LoginPage() {
                   <div className="flex items-center justify-between">
                     <Label htmlFor="password">Password</Label>
                     <Link
-                      href="/reset-password"
+                      href="/forgot-password"
                       className="text-sm text-primary underline-offset-4 hover:underline"
                     >
                       Forgot password?
@@ -142,7 +144,7 @@ export default function LoginPage() {
         <CardFooter className="flex flex-col">
           <div className="text-sm text-muted-foreground mt-2">
             Don&apos;t have an account?{" "}
-            <Link href="/auth/register" className="text-primary underline-offset-4 hover:underline">
+            <Link href="/register" className="text-primary underline-offset-4 hover:underline">
               Sign up
             </Link>
           </div>

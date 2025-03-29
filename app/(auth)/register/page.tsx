@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Github } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { supabase } from "@/lib/supabase-client"
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -35,24 +36,47 @@ export default function RegisterPage() {
     setIsLoading(true)
 
     try {
-      // In a real app, you would use Supabase auth here
-      // const { error } = await supabase.auth.signUp({
-      //   email,
-      //   password,
-      // });
+      const { data, error } = await supabase.auth.signUp({
+        email: email,
+        password: password,
+        options: {
+          emailRedirectTo: 'https://example.com/welcome',
+        },
+      })
 
-      // if (error) throw error;
+      if (error) {
+        throw error
+      }
+
+      if (data.session) {
+        localStorage.setItem('accessToken', data.session.access_token)
+        localStorage.setItem('token_type', data.session.token_type)
+        localStorage.setItem('expires_in', data.session.expires_in.toString())
+        localStorage.setItem('expires_at', data.session?.expires_at?.toString() || '')
+        localStorage.setItem('refresh_token', data.session.refresh_token)
+        localStorage.setItem('user', JSON.stringify(data.user))
+      }
 
       toast({
         title: "Success",
         description: "Registration successful. Please check your email to verify your account.",
       })
 
-      router.push("/auth/login")
-    } catch (error) {
+      setTimeout(() => {
+        router.push("/")
+      }, 2000)
+    } catch (error: any) {
+      let errorMessage = "Failed to register. Please try again."
+      
+      if (error.status === 422) {
+        errorMessage = "User already exists. Please try logging in."
+      } else if (error.message) {
+        errorMessage = error.message
+      }
+
       toast({
         title: "Error",
-        description: "Failed to register. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       })
     } finally {
@@ -64,12 +88,7 @@ export default function RegisterPage() {
     setIsLoading(true)
 
     try {
-      // In a real app, you would use Supabase auth here
-      // const { error } = await supabase.auth.signInWithOAuth({
-      //   provider: provider as Provider,
-      // });
-
-      // if (error) throw error;
+      const { data, error } = await supabase.auth.signInWithOAuth({  provider: 'google',  options: {    redirectTo: 'http://example.com/auth/callback',  },})
 
       toast({
         title: "Redirecting",

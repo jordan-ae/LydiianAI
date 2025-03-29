@@ -7,13 +7,12 @@ import { SidebarProvider } from "@/components/ui/sidebar"
 
 const inter = Inter({
   subsets: ["latin"],
-  display: "swap", // Ensure text remains visible during font loading
+  display: "swap",
 })
 
 export const metadata: Metadata = {
-  title: "Research Assistant",
+  title: "Lydiian AI",
   description: "AI-powered research assistant for academic writing",
-    generator: 'v0.dev'
 }
 
 export default function RootLayout({
@@ -24,7 +23,6 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        {/* Ensure proper viewport settings */}
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </head>
       <body className={inter.className}>

@@ -14,7 +14,6 @@ export function ResearchAssistant() {
   const [rightSidebarOpen, setRightSidebarOpen] = useState(true)
   const [mounted, setMounted] = useState(false)
 
-  // Prevent hydration mismatch
   useEffect(() => {
     setMounted(true)
   }, [])
@@ -31,7 +30,6 @@ export function ResearchAssistant() {
     setTheme(theme === "dark" ? "light" : "dark")
   }
 
-  // Don't render UI until client-side hydration is complete
   if (!mounted) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-background">
@@ -45,12 +43,10 @@ export function ResearchAssistant() {
 
   return (
     <div className="flex h-screen w-full">
-      {/* Left Sidebar */}
       <div className={`border-r transition-all duration-300 ${leftSidebarOpen ? "w-64" : "w-0"}`}>
         {leftSidebarOpen && <LeftSidebar />}
       </div>
 
-      {/* Main Content */}
       <div className="flex-1 flex flex-col relative">
         <header className="flex items-center justify-between p-4">
           <div className="flex items-center gap-2">
@@ -80,7 +76,6 @@ export function ResearchAssistant() {
         </main>
       </div>
 
-      {/* Right Sidebar */}
       <div className={`border-l transition-all duration-300 ${rightSidebarOpen ? "w-80" : "w-0"}`}>
         {rightSidebarOpen && <RightSidebar />}
       </div>

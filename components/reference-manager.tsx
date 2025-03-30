@@ -84,22 +84,21 @@ export function ReferenceManager() {
         <SidebarMenu>
           {filteredReferences.map((ref) => (
             <SidebarMenuItem key={ref.id}>
-              <SidebarMenuButton className="flex-col items-start">
-                <div className="flex w-full items-center">
-                  <BookOpen className="h-4 w-4 shrink-0" />
-                  <span className="ml-2 font-medium">{ref.title}</span>
+              <div className="flex w-full items-start justify-between">
+                <SidebarMenuButton className="flex-col items-start flex-1 pr-8">
+                  <div className="flex w-full items-center">
+                    <BookOpen className="h-4 w-4 shrink-0" />
+                    <span className="ml-2 font-medium line-clamp-1">{ref.title}</span>
+                  </div>
+                  <div className="mt-1 text-xs text-muted-foreground line-clamp-1">
+                    {ref.authors} ({ref.year})
+                  </div>
+                </SidebarMenuButton>
+                <div className="absolute right-2 top-2 flex gap-1">
+                  <Button size="icon" variant="ghost" className="h-6 w-6 text-destructive">
+                    <Trash2 className="h-3 w-3" />
+                  </Button>
                 </div>
-                <div className="mt-1 text-xs text-muted-foreground">
-                  {ref.authors} ({ref.year})
-                </div>
-              </SidebarMenuButton>
-              <div className="absolute right-2 top-2 flex gap-1">
-                <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => copyReference(ref)}>
-                  <Copy className="h-3 w-3" />
-                </Button>
-                <Button size="icon" variant="ghost" className="h-6 w-6 text-destructive">
-                  <Trash2 className="h-3 w-3" />
-                </Button>
               </div>
             </SidebarMenuItem>
           ))}

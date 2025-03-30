@@ -7,12 +7,73 @@ import { AIAutoComplete } from "@/components/ai-autocomplete"
 import { BlockControls } from "@/components/editor/block-controls"
 import { InlineControls } from "@/components/editor/inline-controls"
 import { useState, useCallback, useRef, useEffect } from "react"
+import { supabase } from '@/lib/supabase-client'
 
-export function Editor() {
+interface EditorProps {
+  documentId: string | null;
+  initialContent: string;
+  onContentChange: (content: string) => void;
+}
+
+export function Editor({ documentId, initialContent, onContentChange }: EditorProps) {
   const [hoveredNodePos, setHoveredNodePos] = useState<number | null>(null)
   const [hoveredNodeDom, setHoveredNodeDom] = useState<HTMLElement | null>(null)
   const [selectionRange, setSelectionRange] = useState<{ top: number; left: number; bottom: number } | null>(null)
-  const editorRef = useRef<HTMLDivElement>(null)
+  const editorRef = useRef<any>(null)
+  const [currentText, setCurrentText] = useState('')
+  const [content, setContent] = useState('')
+  const [initialContents, setInitialContent] = useState<string | null>(null);
+
+  const handleContentChange = useCallback(async (content: string) => {
+    if (!documentId) return;
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
+      const { error } = await supabase
+        .from('research_documents')
+        .update({ 
+          content,
+          user_id: user.id 
+        })
+        .eq('id', documentId);
+
+      if (error) {
+        console.error('Error updating document:', error);
+      }
+    } catch (err) {
+      console.error('Failed to update document:', err);
+    }
+  }, [documentId]);
+
+  useEffect(() => {
+    const fetchDocumentContent = async () => {
+      if (documentId) {
+        try {
+          const { data, error } = await supabase
+            .from('research_documents')
+            .select('content')
+            .eq('id', documentId)
+            .single();
+
+          if (!error && data) {
+            setInitialContent(data.content);
+          } else {
+            console.error('Error fetching document:', error);
+            setInitialContent('<h1>New Document</h1><p>Start writing here...</p>');
+          }
+        } catch (err) {
+          console.error('Failed to fetch document:', err);
+          setInitialContent('<h1>New Document</h1><p>Start writing here...</p>');
+        }
+      } else {
+        setInitialContent('<h1>New Document</h1><p>Start writing here...</p>');
+      }
+    };
+
+    fetchDocumentContent();
+  }, [documentId]);
 
   const editor = useEditor({
     extensions: [
@@ -32,8 +93,7 @@ export function Editor() {
       }),
       AIAutoComplete,
     ],
-    content:
-      "<h1>My Research Document</h1><p>Start writing here...</p><p>Hover over this paragraph to see the block controls.</p><p>Select some text to see the inline formatting controls.</p>",
+    content: initialContent || '',
     editorProps: {
       attributes: {
         class:
@@ -44,7 +104,6 @@ export function Editor() {
           const { state } = view
           const $pos = state.doc.resolve(pos)
 
-          // Update selection range for inline controls when text is selected
           setTimeout(() => {
             if (!view.state.selection.empty) {
               const { from, to } = view.state.selection
@@ -89,7 +148,19 @@ export function Editor() {
         console.debug("Error in onSelectionUpdate:", error)
       }
     },
+    onUpdate: ({ editor }) => {
+      const htmlContent = editor.getHTML();
+      onContentChange(htmlContent);
+      handleContentChange(htmlContent);
+    },
   })
+
+  // Update content when initialContent changes
+  useEffect(() => {
+    if (editor && initialContent) {
+      editor.commands.setContent(initialContent);
+    }
+  }, [initialContent]);
 
   const handleMouseMove = useCallback(
     (e: MouseEvent) => {
@@ -136,6 +207,35 @@ export function Editor() {
     [editor],
   )
 
+  // const getCurrentText = useCallback(() => {
+  //   if (editor) {
+  //     return editor.getText();
+  //   }
+  //   return '';
+  // }, [editor]);
+
+  // useEffect(() => {
+  //   console.log('Current text:', getCurrentText());
+  // }, [getCurrentText]);
+
+  useEffect(() => {
+    if (!editor) return;
+
+    const handleUpdate = () => {
+      setCurrentText(editor.getText());
+    };
+
+    editor.on('update', handleUpdate);
+
+    return () => {
+      editor.off('update', handleUpdate);
+    };
+  }, [editor]);
+
+  // useEffect(() => {
+  //   console.log('Updated text:', currentText);
+  // }, [currentText]);
+
   useEffect(() => {
     const editorElement = editorRef.current
     if (editorElement) {
@@ -149,7 +249,12 @@ export function Editor() {
     }
   }, [handleMouseMove])
 
-  // Ensure editor is initialized before rendering controls
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newContent = e.target.value;
+    setContent(newContent);
+    onContentChange(newContent);
+  };
+
   if (!editor) {
     return (
       <div className="notion-editor w-full max-w-4xl mx-auto">

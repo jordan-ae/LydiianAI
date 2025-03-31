@@ -162,7 +162,7 @@ export function LeftSidebar() {
           </SidebarGroup>
         </Collapsible>
 
-        <Collapsible className="group/collapsible">
+        {/* <Collapsible className="group/collapsible">
           <SidebarGroup>
             <SidebarGroupLabel>
               <CollapsibleTrigger>
@@ -189,7 +189,7 @@ export function LeftSidebar() {
               </SidebarGroupContent>
             </CollapsibleContent>
           </SidebarGroup>
-        </Collapsible>
+        </Collapsible> */}
       </SidebarContent>
 
       <SidebarFooter className="mt-auto">

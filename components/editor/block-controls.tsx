@@ -207,7 +207,7 @@ export function BlockControls({ editor, nodePos, nodeDom }: BlockControlsProps) 
   return (
     <div
       ref={controlsRef}
-      className="absolute left-0 flex items-center pointer-events-none z-10"
+      className="absolute left-0 flex items-center pointer-events-none z-10 -pl-[80px]"
       style={{
         top: `${controlsPosition.top}px`,
         height: `${controlsPosition.height}px`,

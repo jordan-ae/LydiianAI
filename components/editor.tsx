@@ -288,9 +288,9 @@ export function Editor({ documentId, initialContent, onContentChange }: EditorPr
   return (
     <div className="notion-editor w-full max-w-4xl mx-auto">
       <div ref={editorRef} className="relative pl-14 sm:pl-0">
-        {editor && hoveredNodePos !== null && hoveredNodeDom && (
+        {/* {editor && hoveredNodePos !== null && hoveredNodeDom && (
           <BlockControls editor={editor} nodePos={hoveredNodePos} nodeDom={hoveredNodeDom} />
-        )}
+        )} */}
         {editor && selectionRange && !editor.view.state.selection.empty && (
           <InlineControls editor={editor} position={selectionRange} />
         )}

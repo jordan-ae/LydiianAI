@@ -16,10 +16,18 @@ export default function DocumentPage({
 
   useEffect(() => {
     const fetchDocument = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        setLoading(false);
+        return;
+      }
+
       const { data, error } = await supabase
         .from("research_documents")
         .select("*")
         .eq("id", unwrappedParams.id)
+        .eq("user_id", user.id)
         .single();
 
       if (error) {

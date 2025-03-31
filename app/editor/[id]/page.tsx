@@ -19,21 +19,18 @@ export default function DocumentPage({
 
   useEffect(() => {
     const fetchDocuments = async () => {
-      // Get current user
       const { data: { user } } = await supabase.auth.getUser();
 
-      // Fetch the specific document
       const { data: singleDoc, error: singleError } = await supabase
         .from("research_documents")
         .select("*")
         .eq("id", unwrappedParams.id)
         .single();
 
-      // Fetch only the current user's documents sorted by last updated
       const { data: allDocs, error: allError } = await supabase
         .from("research_documents")
         .select("*")
-        .eq("user_id", user?.id)  // Filter by user ID
+        .eq("user_id", user?.id)
         .order("updated_at", { ascending: false });
 
       if (singleError || allError) {
@@ -47,7 +44,6 @@ export default function DocumentPage({
       setUserDocuments(allDocs || []);
       
       if (!singleDoc && allDocs?.length > 0) {
-        // Redirect to the most recent document if current one doesn't exist
         router.push(`/editor/${allDocs[0].id}`);
         return;
       }

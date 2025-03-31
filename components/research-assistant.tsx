@@ -5,18 +5,25 @@ import { Editor } from "@/components/editor"
 import { LeftSidebar } from "@/components/left-sidebar"
 import { RightSidebar } from "@/components/right-sidebar"
 import { Button } from "@/components/ui/button"
-import { Moon, Sun, ChevronLeft, ChevronRight } from "lucide-react"
+import { Moon, Sun, ChevronLeft, ChevronRight, Download, Upload } from "lucide-react"
 import { useTheme } from "next-themes"
 import { supabase } from '@/lib/supabase-client';
 import { useRouter } from 'next/navigation';
+import { formatLastUpdated } from "@/utils/date-formatter"
 
 interface ResearchAssistantProps {
   initialDocumentId?: string | null;
   initialContent?: string;
   initialTitle?: string;
+  lastUpdatedAt?: string;
 }
 
-export function ResearchAssistant({ initialDocumentId, initialContent, initialTitle }: ResearchAssistantProps) {
+export function ResearchAssistant({ 
+  initialDocumentId, 
+  initialContent, 
+  initialTitle,
+  lastUpdatedAt 
+}: ResearchAssistantProps) {
   const { theme, setTheme } = useTheme()
   const [leftSidebarOpen, setLeftSidebarOpen] = useState(false)
   const [rightSidebarOpen, setRightSidebarOpen] = useState(false)
@@ -26,6 +33,7 @@ export function ResearchAssistant({ initialDocumentId, initialContent, initialTi
   const [documentTitle, setDocumentTitle] = useState<string>(initialTitle || 'Untitled Document');
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [tempTitle, setTempTitle] = useState(documentTitle);
+  const [lastUpdated, setLastUpdated] = useState<string>(lastUpdatedAt || new Date().toISOString());
 
   // Add useRef for debounce timeout
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
@@ -40,7 +48,7 @@ export function ResearchAssistant({ initialDocumentId, initialContent, initialTi
       if (initialDocumentId) {
         const { data, error } = await supabase
           .from('research_documents')
-          .select('content, title')
+          .select('content, title, updated_at')
           .eq('id', initialDocumentId)
           .single();
 
@@ -48,6 +56,7 @@ export function ResearchAssistant({ initialDocumentId, initialContent, initialTi
           setInitialContent(data.content);
           setDocumentTitle(data.title || 'Untitled Document');
           setCurrentDocumentId(initialDocumentId);
+          setLastUpdated(data.updated_at || new Date().toISOString());
         }
       }
     };
@@ -69,18 +78,20 @@ export function ResearchAssistant({ initialDocumentId, initialContent, initialTi
 
   const handleContentChange = async (content: string) => {
     if (currentDocumentId) {
-      // Clear any existing timeout
       if (debounceTimeout.current) {
         clearTimeout(debounceTimeout.current);
       }
       
-      // Set a new timeout
       debounceTimeout.current = setTimeout(async () => {
-        await supabase
+        const { data, error } = await supabase
           .from('research_documents')
-          .update({ content })
+          .update({ content, updated_at: new Date().toISOString() })
           .eq('id', currentDocumentId);
-      }, 2000); // 500ms debounce delay
+
+        if (!error && data) {
+          setLastUpdated(new Date().toISOString());
+        }
+      }, 2000);
     }
   };
 
@@ -88,11 +99,12 @@ export function ResearchAssistant({ initialDocumentId, initialContent, initialTi
     if (currentDocumentId) {
       const { error } = await supabase
         .from('research_documents')
-        .update({ title: newTitle })
+        .update({ title: newTitle, updated_at: new Date().toISOString() })
         .eq('id', currentDocumentId);
 
       if (!error) {
         setDocumentTitle(newTitle);
+        setLastUpdated(new Date().toISOString());
       }
     }
   };
@@ -133,15 +145,17 @@ export function ResearchAssistant({ initialDocumentId, initialContent, initialTi
 
   return (
     <div className="flex h-screen w-full">
-      <div className={`border-r transition-all duration-300 ${leftSidebarOpen ? "w-64" : "w-0"}`}>
+      <div className={`fixed sm:relative z-50 h-screen border-r bg-background transition-transform transform ${
+        leftSidebarOpen ? "translate-x-0 w-64" : "-translate-x-full sm:translate-x-0 sm:w-0"
+      }`}>
         {leftSidebarOpen && <LeftSidebar />}
       </div>
 
-      <div className="flex-1 flex flex-col relative">
+      <div className="flex-1 flex flex-col relative min-w-0">
         <header className="flex items-center justify-between p-4">
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" onClick={toggleLeftSidebar}>
-              {leftSidebarOpen ? <ChevronLeft className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
+            <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-10 sm:w-10" onClick={toggleLeftSidebar}>
+              {leftSidebarOpen ? <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" /> : <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />}
             </Button>
             {isEditingTitle ? (
               <input
@@ -158,41 +172,45 @@ export function ResearchAssistant({ initialDocumentId, initialContent, initialTi
                     handleTitleChange(tempTitle);
                   }
                 }}
-                className="text-xl font-semibold bg-transparent focus:outline-none"
+                className="text-lg sm:text-xl font-semibold bg-transparent focus:outline-none"
                 autoFocus
               />
             ) : (
-              <h1 
-                className="text-xl font-semibold cursor-pointer hover:bg-muted/50 px-2 py-1 rounded"
-                onClick={() => {
-                  setTempTitle(documentTitle);
-                  setIsEditingTitle(true);
-                }}
-              >
-                {documentTitle}
-              </h1>
+              <div className="flex flex-col">
+                <h1 
+                  className="text-lg sm:text-xl font-semibold cursor-pointer hover:bg-muted/50 px-2 py-1 rounded"
+                  onClick={() => {
+                    setTempTitle(documentTitle);
+                    setIsEditingTitle(true);
+                  }}
+                >
+                  {documentTitle}
+                </h1>
+                <span className="hidden sm:block text-xs text-muted-foreground px-2">
+                  Last updated: {formatLastUpdated(lastUpdated)}
+                </span>
+              </div>
             )}
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="outline" onClick={() => console.log('Export clicked')}>
-              Export
+            <Button variant="outline" className="h-8 px-2 sm:h-10 sm:px-4" onClick={() => console.log('Export clicked')}>
+              <span className="hidden sm:inline">Export</span>
+              <Download className="h-4 w-4 sm:hidden" />
             </Button>
-            <Button onClick={() => console.log('Publish clicked')}>
-              Publish
+            <Button className="h-8 px-2 sm:h-10 sm:px-4" onClick={() => console.log('Publish clicked')}>
+              <span className="hidden sm:inline">Publish</span>
+              <Upload className="h-4 w-4 sm:hidden" />
             </Button>
-            <Button variant="ghost" size="icon" onClick={toggleRightSidebar}>
-              {rightSidebarOpen ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
+            <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-10 sm:w-10" onClick={toggleRightSidebar}>
+              {rightSidebarOpen ? <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" /> : <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />}
             </Button>
-            <Button variant="ghost" size="icon" onClick={toggleTheme}>
-              {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-10 sm:w-10" onClick={toggleTheme}>
+              {theme === "dark" ? <Sun className="h-4 w-4 sm:h-5 sm:w-5" /> : <Moon className="h-4 w-4 sm:h-5 sm:w-5" />}
             </Button>
-            {/* <Button onClick={createNewDocument}>
-              New Document
-            </Button> */}
           </div>
         </header>
 
-        <main className="flex-1 overflow-auto">
+        <main className="flex-1 overflow-auto min-w-0">
           <Editor 
             documentId={currentDocumentId}
             initialContent={initialContentState}
@@ -201,7 +219,9 @@ export function ResearchAssistant({ initialDocumentId, initialContent, initialTi
         </main>
       </div>
 
-      <div className={`border-l transition-all duration-300 ${rightSidebarOpen ? "w-80" : "w-0"}`}>
+      <div className={`fixed sm:relative z-50 h-screen border-l bg-background transition-transform transform ${
+        rightSidebarOpen ? "translate-x-0 w-80" : "translate-x-full sm:translate-x-0 sm:w-0"
+      }`}>
         {rightSidebarOpen && <RightSidebar />}
       </div>
     </div>

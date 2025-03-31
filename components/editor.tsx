@@ -18,7 +18,7 @@ interface EditorProps {
 export function Editor({ documentId, initialContent, onContentChange }: EditorProps) {
   const [hoveredNodePos, setHoveredNodePos] = useState<number | null>(null)
   const [hoveredNodeDom, setHoveredNodeDom] = useState<HTMLElement | null>(null)
-  const [selectionRange, setSelectionRange] = useState<{ top: number; left: number; bottom: number } | null>(null)
+  const [selectionRange, setSelectionRange] = useState<{ top: number; left: number; bottom: number; position: 'top' | 'bottom' } | null>(null)
   const editorRef = useRef<any>(null)
   const [currentText, setCurrentText] = useState('')
   const [content, setContent] = useState('')
@@ -81,17 +81,28 @@ export function Editor({ documentId, initialContent, onContentChange }: EditorPr
         heading: {
           levels: [1, 2, 3],
         },
+        paragraph: {
+          HTMLAttributes: {
+            class: 'paragraph',
+          },
+        },
+        hardBreak: false,
+        dropcursor: {
+          color: '#DBEAFE',
+          width: 4,
+        },
       }),
       Placeholder.configure({
         placeholder: ({ node }) => {
           if (node.type.name === "heading") {
             return "Heading"
           }
-          return 'Type "/" for commands...'
+          return 'Start writing...'
         },
         includeChildren: true,
       }),
       AIAutoComplete,
+
     ],
     content: initialContent || '',
     editorProps: {
@@ -99,31 +110,24 @@ export function Editor({ documentId, initialContent, onContentChange }: EditorPr
         class:
           "prose prose-sm sm:prose lg:prose-lg xl:prose-xl dark:prose-invert focus:outline-none max-w-none px-8 py-6 tiptap",
       },
-      handleClick(view, pos, event) {
-        try {
-          const { state } = view
-          const $pos = state.doc.resolve(pos)
+      handleKeyDown: (view, event) => {
+        if (event.key === 'Enter' && !event.shiftKey) {
+          const { state } = view;
+          const { selection } = state;
+          const { $from, empty } = selection;
 
-          setTimeout(() => {
-            if (!view.state.selection.empty) {
-              const { from, to } = view.state.selection
-              const start = view.coordsAtPos(from)
-              const end = view.coordsAtPos(to)
+          if (!empty || $from.parent.type.name !== 'paragraph') {
+            return false;
+          }
 
-              setSelectionRange({
-                top: Math.min(start.bottom, end.bottom),
-                left: Math.min(start.left, end.left) + Math.abs(end.left - start.left) / 2,
-                bottom: Math.max(start.bottom, end.bottom),
-              })
-            } else {
-              setSelectionRange(null)
-            }
-          }, 0)
-        } catch (error) {
-          console.debug("Error in handleClick:", error)
+          view.dispatch(
+            state.tr
+              .split($from.pos, 1)
+              .scrollIntoView()
+          );
+          return true;
         }
-
-        return false
+        return false;
       },
     },
     onSelectionUpdate: ({ editor }) => {
@@ -136,10 +140,21 @@ export function Editor({ documentId, initialContent, onContentChange }: EditorPr
           const start = editor.view.coordsAtPos(from)
           const end = editor.view.coordsAtPos(to)
 
+          const centerX = (start.left + end.left) / 2
+          const selectionHeight = Math.abs(end.bottom - start.top)
+
+          const viewportHeight = window.innerHeight
+          const viewportWidth = window.innerWidth
+
+          // Check if there's enough space below
+          const spaceBelow = viewportHeight - end.bottom
+          const spaceAbove = start.top
+
           setSelectionRange({
-            top: Math.min(start.bottom, end.bottom),
-            left: Math.min(start.left, end.left) + Math.abs(end.left - start.left) / 2,
-            bottom: Math.max(start.bottom, end.bottom),
+            top: end.bottom,
+            left: centerX,
+            bottom: end.bottom + selectionHeight,
+            position: spaceBelow > 100 ? 'bottom' : 'top'
           })
         } else {
           setSelectionRange(null)
@@ -155,7 +170,6 @@ export function Editor({ documentId, initialContent, onContentChange }: EditorPr
     },
   })
 
-  // Update content when initialContent changes
   useEffect(() => {
     if (editor && initialContent) {
       editor.commands.setContent(initialContent);
@@ -174,7 +188,6 @@ export function Editor({ documentId, initialContent, onContentChange }: EditorPr
           const $pos = view.state.doc.resolve(pos.pos)
 
           if ($pos.parent.isBlock) {
-            // Find the DOM node for this position
             let domNode = null
 
             // For top-level nodes
@@ -186,7 +199,6 @@ export function Editor({ documentId, initialContent, onContentChange }: EditorPr
                 setHoveredNodePos(nodePos)
               }
             } else {
-              // For nested nodes
               const nodePos = $pos.before($pos.depth)
               const node = view.nodeDOM(nodePos)
               if (node && node instanceof HTMLElement) {
@@ -207,17 +219,6 @@ export function Editor({ documentId, initialContent, onContentChange }: EditorPr
     [editor],
   )
 
-  // const getCurrentText = useCallback(() => {
-  //   if (editor) {
-  //     return editor.getText();
-  //   }
-  //   return '';
-  // }, [editor]);
-
-  // useEffect(() => {
-  //   console.log('Current text:', getCurrentText());
-  // }, [getCurrentText]);
-
   useEffect(() => {
     if (!editor) return;
 
@@ -232,10 +233,6 @@ export function Editor({ documentId, initialContent, onContentChange }: EditorPr
     };
   }, [editor]);
 
-  // useEffect(() => {
-  //   console.log('Updated text:', currentText);
-  // }, [currentText]);
-
   useEffect(() => {
     const editorElement = editorRef.current
     if (editorElement) {
@@ -248,6 +245,29 @@ export function Editor({ documentId, initialContent, onContentChange }: EditorPr
       }
     }
   }, [handleMouseMove])
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (editor && !editor.state.selection.empty) {
+        const { from, to } = editor.state.selection
+        const start = editor.view.coordsAtPos(from)
+        const end = editor.view.coordsAtPos(to)
+
+        const centerX = (start.left + end.left) / 2
+        const selectionHeight = Math.abs(end.bottom - start.top)
+
+        setSelectionRange({
+          top: end.bottom,
+          left: centerX,
+          bottom: end.bottom + selectionHeight,
+          position: 'bottom'
+        })
+      }
+    }
+
+    window.addEventListener('scroll', handleScroll, true)
+    return () => window.removeEventListener('scroll', handleScroll, true)
+  }, [editor])
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newContent = e.target.value;
@@ -267,7 +287,7 @@ export function Editor({ documentId, initialContent, onContentChange }: EditorPr
 
   return (
     <div className="notion-editor w-full max-w-4xl mx-auto">
-      <div ref={editorRef} className="relative pl-14">
+      <div ref={editorRef} className="relative pl-14 sm:pl-0">
         {editor && hoveredNodePos !== null && hoveredNodeDom && (
           <BlockControls editor={editor} nodePos={hoveredNodePos} nodeDom={hoveredNodeDom} />
         )}

@@ -23,18 +23,40 @@ export default function DocumentPage({
         return;
       }
 
-      const { data, error } = await supabase
+      // First fetch the requested document
+      const { data: requestedDoc, error: docError } = await supabase
         .from("research_documents")
         .select("*")
         .eq("id", unwrappedParams.id)
-        .eq("user_id", user.id)
         .single();
 
-      if (error) {
-        console.error(error);
-      } else {
-        setDocument(data);
+      // If document exists and belongs to user, use it
+      if (!docError && requestedDoc && requestedDoc.user_id === user.id) {
+        setDocument(requestedDoc);
+        setLoading(false);
+        return;
       }
+
+      // If not, fetch the user's documents
+      const { data: userDocuments, error: userDocsError } = await supabase
+        .from("research_documents")
+        .select("id")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(1);
+
+      if (userDocsError || !userDocuments?.length) {
+        // No documents found, redirect to home
+        window.location.href = '/';
+        return;
+      }
+
+      // Only redirect if the current document doesn't belong to the user
+      if (!requestedDoc || requestedDoc.user_id !== user.id) {
+        window.location.href = `/editor/${userDocuments[0].id}`;
+        return;
+      }
+
       setLoading(false);
     };
 

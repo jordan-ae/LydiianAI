@@ -217,8 +217,8 @@ export function BlockControls({ editor, nodePos, nodeDom }: BlockControlsProps) 
     >
       <div
         className={cn(
-          "flex gap-1 transition-opacity duration-200 pointer-events-auto -ml-12",
-          showControls ? "opacity-100" : "opacity-30", // Show faded controls when not hovered
+          "flex gap-1 transition-opacity duration-200 pointer-events-auto",
+          showControls ? "opacity-100" : "opacity-30",
         )}
       >
         <DropdownMenu>
@@ -261,54 +261,6 @@ export function BlockControls({ editor, nodePos, nodeDom }: BlockControlsProps) 
             <DropdownMenuItem onClick={() => addBlock("image")}>
               <Image className="mr-2 h-4 w-4" />
               <span>Image</span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-8 w-8 rounded-full bg-background shadow-sm hover:bg-background"
-            >
-              <GripVertical className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-48">
-            <DropdownMenuItem onClick={() => formatBlock("cite")}>
-              <BookOpen className="mr-2 h-4 w-4" />
-              <span>Cite</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => formatBlock("chat")}>
-              <MessageSquare className="mr-2 h-4 w-4" />
-              <span>Chat about this</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => formatBlock("aiEdit")}>
-              <Edit3 className="mr-2 h-4 w-4" />
-              <span>AI Edit</span>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => formatBlock("bold")}>
-              <Bold className="mr-2 h-4 w-4" />
-              <span>Bold</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => formatBlock("italic")}>
-              <Italic className="mr-2 h-4 w-4" />
-              <span>Italic</span>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => formatBlock("alignLeft")}>
-              <AlignLeft className="mr-2 h-4 w-4" />
-              <span>Align Left</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => formatBlock("alignCenter")}>
-              <AlignCenter className="mr-2 h-4 w-4" />
-              <span>Align Center</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => formatBlock("alignRight")}>
-              <AlignRight className="mr-2 h-4 w-4" />
-              <span>Align Right</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

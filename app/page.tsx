@@ -14,9 +14,13 @@ export default function Home() {
       redirect("/login");
     } else {
       const fetchOrCreateDocument = async () => {
+        const user = await supabase.auth.getUser();
+        if (!user.data.user?.id) return;
+
         const { data, error } = await supabase
           .from('research_documents')
           .select('id')
+          .eq('user_id', user.data.user.id)
           .order('updated_at', { ascending: false })
           .limit(1);
 
@@ -27,7 +31,10 @@ export default function Home() {
 
         const { data: newDocument, error: createError } = await supabase
           .from('research_documents')
-          .insert({ title: 'Untitled Document' })
+          .insert({ 
+            title: 'Untitled Document',
+            user_id: user.data.user.id
+          })
           .select('id')
           .single();
 

@@ -4,64 +4,60 @@ import { ResearchAssistant } from "@/components/research-assistant";
 import { supabase } from "@/lib/supabase-client";
 import { useEffect, useState, use } from "react";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 
 export default function DocumentPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const router = useRouter();
   const unwrappedParams = use(params);
   const [document, setDocument] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [userDocuments, setUserDocuments] = useState<any[]>([]);
 
   useEffect(() => {
-    const fetchDocument = async () => {
+    const fetchDocuments = async () => {
+      // Get current user
       const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        setLoading(false);
-        return;
-      }
 
-      // First fetch the requested document
-      const { data: requestedDoc, error: docError } = await supabase
+      // Fetch the specific document
+      const { data: singleDoc, error: singleError } = await supabase
         .from("research_documents")
         .select("*")
         .eq("id", unwrappedParams.id)
         .single();
 
-      // If document exists and belongs to user, use it
-      if (!docError && requestedDoc && requestedDoc.user_id === user.id) {
-        setDocument(requestedDoc);
+      // Fetch only the current user's documents sorted by last updated
+      const { data: allDocs, error: allError } = await supabase
+        .from("research_documents")
+        .select("*")
+        .eq("user_id", user?.id)  // Filter by user ID
+        .order("updated_at", { ascending: false });
+
+      if (singleError || allError) {
+        console.error(singleError || allError);
         setLoading(false);
         return;
       }
 
-      // If not, fetch the user's documents
-      const { data: userDocuments, error: userDocsError } = await supabase
-        .from("research_documents")
-        .select("id")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false })
-        .limit(1);
+      console.log(allDocs); 
 
-      if (userDocsError || !userDocuments?.length) {
-        // No documents found, redirect to home
-        window.location.href = '/';
+      setUserDocuments(allDocs || []);
+      
+      if (!singleDoc && allDocs?.length > 0) {
+        // Redirect to the most recent document if current one doesn't exist
+        router.push(`/editor/${allDocs[0].id}`);
         return;
       }
 
-      // Only redirect if the current document doesn't belong to the user
-      if (!requestedDoc || requestedDoc.user_id !== user.id) {
-        window.location.href = `/editor/${userDocuments[0].id}`;
-        return;
-      }
-
+      setDocument(singleDoc);
       setLoading(false);
     };
 
-    fetchDocument();
-  }, [unwrappedParams.id]);
+    fetchDocuments();
+  }, [unwrappedParams.id, router]);
 
   if (loading)
     return (

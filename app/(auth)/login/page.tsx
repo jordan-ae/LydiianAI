@@ -60,7 +60,7 @@ export default function LoginPage() {
     setIsLoading(true)
 
     try {
-      const { data, error } = await supabase.auth.signInWithOAuth({  provider: 'google',  options: {    redirectTo: 'http://example.com/auth/callback',  },})
+      const { data, error } = await supabase.auth.signInWithOAuth({  provider: 'google',  options: {    redirectTo: 'https://tmonexoitirozzijyoxa.supabase.co/auth/v1/callback',  },})
       
       toast({
         title: "Redirecting",

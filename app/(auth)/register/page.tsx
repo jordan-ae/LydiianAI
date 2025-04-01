@@ -1,116 +1,152 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Github } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
-import { supabase } from "@/lib/supabase-client"
+import { useState } from "react";
+import Link from "next/link";
+import { redirect, useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Github } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/lib/supabase-client";
 
 export default function RegisterPage() {
-  const router = useRouter()
-  const { toast } = useToast()
-  const [isLoading, setIsLoading] = useState(false)
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [confirmPassword, setConfirmPassword] = useState("")
+  const router = useRouter();
+  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (password !== confirmPassword) {
       toast({
         title: "Error",
         description: "Passwords do not match.",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
-    setIsLoading(true)
+    setIsLoading(true);
 
     try {
       const { data, error } = await supabase.auth.signUp({
         email: email,
         password: password,
         options: {
-          emailRedirectTo: 'https://example.com/welcome',
+          emailRedirectTo: "https://example.com/welcome",
         },
-      })
+      });
 
       if (error) {
-        throw error
+        throw error;
       }
 
       if (data.session) {
-        localStorage.setItem('accessToken', data.session.access_token)
-        localStorage.setItem('token_type', data.session.token_type)
-        localStorage.setItem('expires_in', data.session.expires_in.toString())
-        localStorage.setItem('expires_at', data.session?.expires_at?.toString() || '')
-        localStorage.setItem('refresh_token', data.session.refresh_token)
-        localStorage.setItem('user', JSON.stringify(data.user))
+        localStorage.setItem("accessToken", data.session.access_token);
+        localStorage.setItem("token_type", data.session.token_type);
+        localStorage.setItem("expires_in", data.session.expires_in.toString());
+        localStorage.setItem(
+          "expires_at",
+          data.session?.expires_at?.toString() || ""
+        );
+        localStorage.setItem("refresh_token", data.session.refresh_token);
+        localStorage.setItem("user", JSON.stringify(data.user));
       }
 
       toast({
         title: "Success",
-        description: "Registration successful. Please check your email to verify your account.",
-      })
+        description:
+          "Registration successful. Please check your email to verify your account.",
+      });
 
       setTimeout(() => {
-        router.push("/")
-      }, 2000)
+        router.push("/");
+      }, 2000);
     } catch (error: any) {
-      let errorMessage = "Failed to register. Please try again."
-      
+      let errorMessage = "Failed to register. Please try again.";
+
       if (error.status === 422) {
-        errorMessage = "User already exists. Please try logging in."
+        errorMessage = "User already exists. Please try logging in.";
       } else if (error.message) {
-        errorMessage = error.message
+        errorMessage = error.message;
       }
 
       toast({
         title: "Error",
         description: errorMessage,
         variant: "destructive",
-      })
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleOAuthRegister = async (provider: string) => {
-    setIsLoading(true)
+    setIsLoading(true);
 
     try {
-      const { data, error } = await supabase.auth.signInWithOAuth({  provider: 'google',  options: {    redirectTo: 'http://example.com/auth/callback',  },})
+      // const { data, error } = await supabase.auth.signInWithOAuth({
+      //   provider: "google",
+      //   options: {
+      //     redirectTo:
+      //       "https://tmonexoitirozzijyoxa.supabase.co/auth/v1/callback",
+      //   },
+      // });
+
+      await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `https://tmonexoitirozzijyoxa.supabase.co/auth/v1/callback`,
+        },
+      })
+      // if (data) {
+      //   localStorage.setItem('accessToken', data.session.access_token)
+      //   localStorage.setItem('token_type', data.session.token_type)
+      //   localStorage.setItem('expires_in', data.session.expires_in.toString())
+      //   localStorage.setItem('expires_at', data.session?.expires_at?.toString() || '')
+      //   localStorage.setItem('refresh_token', data.session.refresh_token)
+      //   localStorage.setItem('user', JSON.stringify(data.user))
+      // }
 
       toast({
         title: "Redirecting",
         description: `Redirecting to ${provider} for authentication.`,
-      })
+      });
     } catch (error) {
       toast({
         title: "Error",
         description: `Failed to register with ${provider}.`,
         variant: "destructive",
-      })
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <div className="flex w-full items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold">Create an account</CardTitle>
-          <CardDescription>Sign up to get started with Lydiian AI</CardDescription>
+          <CardTitle className="text-2xl font-bold">
+            Create an account
+          </CardTitle>
+          <CardDescription>
+            Sign up to get started with Lydiian AI
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4">
@@ -128,7 +164,9 @@ export default function RegisterPage() {
                 <span className="w-full border-t" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
+                <span className="bg-background px-2 text-muted-foreground">
+                  Or continue with
+                </span>
               </div>
             </div>
             <form onSubmit={handleRegister}>
@@ -174,13 +212,15 @@ export default function RegisterPage() {
         <CardFooter className="flex flex-col">
           <div className="text-sm text-muted-foreground mt-2">
             Already have an account?{" "}
-            <Link href="/login" className="text-primary underline-offset-4 hover:underline">
+            <Link
+              href="/login"
+              className="text-primary underline-offset-4 hover:underline"
+            >
               Sign in
             </Link>
           </div>
         </CardFooter>
       </Card>
     </div>
-  )
+  );
 }
-

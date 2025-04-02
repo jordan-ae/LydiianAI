@@ -24,7 +24,6 @@ export default function CallbackPage() {
         const providerToken = params.get('provider_token')
 
         if (accessToken) {
-          // Store tokens in localStorage
           localStorage.setItem('accessToken', accessToken)
           localStorage.setItem('token_type', tokenType || '')
           localStorage.setItem('expires_in', expiresIn || '')
@@ -50,13 +49,8 @@ export default function CallbackPage() {
             router.push("/");
             return;
           }
-          
-          if (redirectUrl.startsWith("http")) {
-            console.log("Redirecting to:", redirectUrl)
-            window.location.href = redirectUrl;
-          } else {
+
             router.push(redirectUrl);
-          }  
         } else {
           throw new Error('No access token found in URL')
         }

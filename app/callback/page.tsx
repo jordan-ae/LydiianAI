@@ -12,24 +12,46 @@ export default function CallbackPage() {
   useEffect(() => {
     const handleAuth = async () => {
       try {
-        const { data: { session }, error } = await supabase.auth.getSession()
+        // Handle URL hash parameters
+        const hash = window.location.hash.substring(1)
+        const params = new URLSearchParams(hash)
+        
+        const accessToken = params.get('access_token')
+        const expiresAt = params.get('expires_at')
+        const expiresIn = params.get('expires_in')
+        const refreshToken = params.get('refresh_token')
+        const tokenType = params.get('token_type')
+        const providerToken = params.get('provider_token')
 
-        if (error) throw error
+        if (accessToken) {
+          // Store tokens in localStorage
+          localStorage.setItem('accessToken', accessToken)
+          localStorage.setItem('token_type', tokenType || '')
+          localStorage.setItem('expires_in', expiresIn || '')
+          localStorage.setItem('expires_at', expiresAt || '')
+          localStorage.setItem('refresh_token', refreshToken || '')
 
-        if (session) {
-          localStorage.setItem('accessToken', session.access_token)
-          localStorage.setItem('token_type', session.token_type)
-          localStorage.setItem('expires_in', session.expires_in.toString())
-          localStorage.setItem('expires_at', session.expires_at?.toString() || '')
-          localStorage.setItem('refresh_token', session.refresh_token)
-          localStorage.setItem('user', JSON.stringify(session.user))
+          // Get user info
+          const { data: { user }, error } = await supabase.auth.getUser(accessToken)
+          
+          if (error) throw error
+          if (user) {
+            localStorage.setItem('user', JSON.stringify(user))
+          }
 
           toast({
             title: "Success",
             description: "You have successfully logged in.",
           })
 
-          router.push("/")
+          // Redirect to production domain
+          if (process.env.NODE_ENV === 'production') {
+            window.location.href = 'https://lydiian.co/'
+          } else {
+            router.push("/")
+          }
+        } else {
+          throw new Error('No access token found in URL')
         }
       } catch (error) {
         toast({

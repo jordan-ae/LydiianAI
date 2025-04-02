@@ -44,12 +44,18 @@ export default function CallbackPage() {
             description: "You have successfully logged in.",
           })
 
-          const redirectUrl = process.env.NEXT_PUBLIC_REDIRECT_URL || "/"
-          if (redirectUrl.startsWith("http")) {
-            window.location.href = redirectUrl
-          } else {
-            router.push(redirectUrl)
+          const redirectUrl = process.env.NEXT_PUBLIC_REDIRECT_URL;
+          if (!redirectUrl) {
+            console.warn("Redirect URL is not set, defaulting to home page.");
+            router.push("/");
+            return;
           }
+          
+          if (redirectUrl.startsWith("http")) {
+            window.location.href = redirectUrl;
+          } else {
+            router.push(redirectUrl);
+          }  
         } else {
           throw new Error('No access token found in URL')
         }

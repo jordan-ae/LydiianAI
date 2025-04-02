@@ -31,7 +31,6 @@ export default function CallbackPage() {
           localStorage.setItem('expires_at', expiresAt || '')
           localStorage.setItem('refresh_token', refreshToken || '')
 
-          // Get user info
           const { data: { user }, error } = await supabase.auth.getUser(accessToken)
           
           if (error) throw error
@@ -45,6 +44,7 @@ export default function CallbackPage() {
           })
 
           const redirectUrl = process.env.NEXT_PUBLIC_REDIRECT_URL;
+          console.log(redirectUrl)
           if (!redirectUrl) {
             console.warn("Redirect URL is not set, defaulting to home page.");
             router.push("/");
@@ -52,6 +52,7 @@ export default function CallbackPage() {
           }
           
           if (redirectUrl.startsWith("http")) {
+            console.log("Redirecting to:", redirectUrl)
             window.location.href = redirectUrl;
           } else {
             router.push(redirectUrl);

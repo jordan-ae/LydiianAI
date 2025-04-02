@@ -3,11 +3,11 @@
 import { useEditor, EditorContent } from "@tiptap/react"
 import StarterKit from "@tiptap/starter-kit"
 import Placeholder from "@tiptap/extension-placeholder"
-import { AIAutoComplete } from "@/components/ai-autocomplete"
 import { BlockControls } from "@/components/editor/block-controls"
 import { InlineControls } from "@/components/editor/inline-controls"
 import { useState, useCallback, useRef, useEffect } from "react"
 import { supabase } from '@/lib/supabase-client'
+import { AIAutoComplete } from "./ai-autocomplete"
 
 interface EditorProps {
   documentId: string | null;

@@ -99,28 +99,12 @@ export default function RegisterPage() {
     setIsLoading(true);
 
     try {
-      // const { data, error } = await supabase.auth.signInWithOAuth({
-      //   provider: "google",
-      //   options: {
-      //     redirectTo:
-      //       "https://tmonexoitirozzijyoxa.supabase.co/auth/v1/callback",
-      //   },
-      // });
-
       await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `https://tmonexoitirozzijyoxa.supabase.co/auth/v1/callback`,
+          redirectTo: `${window.location.origin}/callback`,
         },
-      })
-      // if (data) {
-      //   localStorage.setItem('accessToken', data.session.access_token)
-      //   localStorage.setItem('token_type', data.session.token_type)
-      //   localStorage.setItem('expires_in', data.session.expires_in.toString())
-      //   localStorage.setItem('expires_at', data.session?.expires_at?.toString() || '')
-      //   localStorage.setItem('refresh_token', data.session.refresh_token)
-      //   localStorage.setItem('user', JSON.stringify(data.user))
-      // }
+      });
 
       toast({
         title: "Redirecting",

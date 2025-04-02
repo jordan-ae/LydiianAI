@@ -44,11 +44,11 @@ export default function CallbackPage() {
             description: "You have successfully logged in.",
           })
 
-          // Redirect to production domain
-          if (process.env.NODE_ENV === 'production') {
-            window.location.href = 'https://lydiian.co/'
+          const redirectUrl = process.env.NEXT_PUBLIC_REDIRECT_URL || "/"
+          if (redirectUrl.startsWith("http")) {
+            window.location.href = redirectUrl
           } else {
-            router.push("/")
+            router.push(redirectUrl)
           }
         } else {
           throw new Error('No access token found in URL')

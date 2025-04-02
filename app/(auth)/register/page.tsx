@@ -105,6 +105,8 @@ export default function RegisterPage() {
         },
       });
 
+      console.log(window.location.origin)
+
       toast({
         title: "Redirecting",
         description: `Redirecting to ${provider} for authentication.`,

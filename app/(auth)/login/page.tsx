@@ -65,6 +65,8 @@ export default function LoginPage() {
           redirectTo: `${window.location.origin}/callback`,
         },
       })
+
+      console.log(window.location.origin)
       
       toast({
         title: "Redirecting",

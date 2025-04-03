@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase-client";
+import Image from "next/image";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -126,7 +127,8 @@ export default function RegisterPage() {
     <div className="flex w-full items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold">
+          <CardTitle className="text-2xl font-bold flex gap-2">
+          <Image src="/logowhitet.png" alt="Lydiian AI" width={32} height={32} />
             Create an account
           </CardTitle>
           <CardDescription>

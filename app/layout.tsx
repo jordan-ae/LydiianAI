@@ -13,6 +13,14 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "Lydiian AI",
   description: "AI-powered research assistant for academic writing",
+  icons: '/logowhitet.png',
+  openGraph: {
+    images: "/logowhitet.png",
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: "/logowhitet.png",
+  },
 }
 
 export default function RootLayout({

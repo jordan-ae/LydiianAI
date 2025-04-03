@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { useToast } from "@/hooks/use-toast"
 import { supabase } from "@/lib/supabase-client"
+import Image from "next/image"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -87,7 +88,10 @@ export default function LoginPage() {
     <div className="flex w-full items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold">Welcome Back!</CardTitle>
+          <CardTitle className="text-2xl font-bold flex gap-2">
+            <Image src="/logowhitet.png" alt="Lydiian AI" width={32} height={32} />
+            Welcome Back!
+            </CardTitle>
           <CardDescription>Sign in to your account to continue</CardDescription>
         </CardHeader>
         <CardContent>

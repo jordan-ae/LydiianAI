@@ -47,7 +47,7 @@ export function PlateEditor({ initialContent, docId }: PlateEditorProps) {
     <DndProvider backend={HTML5Backend}>
       <Plate editor={editor} onChange={handleChange}>
         <EditorContainer>
-          <Editor variant="demo" />
+          <Editor variant="demo" placeholder="Start writing here..."/>
         </EditorContainer>
         <SettingsDialog />
       </Plate>

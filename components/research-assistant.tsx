@@ -10,6 +10,8 @@ import { useTheme } from "next-themes"
 import { supabase } from '@/lib/supabase-client';
 import { useRouter } from 'next/navigation';
 import { formatLastUpdated } from "@/utils/date-formatter"
+import { SettingsProvider } from "./editor/settings"
+import { PlateEditor } from "./editor/plate-editor"
 
 interface ResearchAssistantProps {
   initialDocumentId?: string | null;
@@ -42,7 +44,6 @@ export function ResearchAssistant({
     setMounted(true)
   }, [])
 
-  // Fetch document content when initialDocumentId changes
   useEffect(() => {
     const fetchDocumentContent = async () => {
       if (initialDocumentId) {
@@ -211,7 +212,7 @@ export function ResearchAssistant({
         </header>
 
         <main className="flex-1 overflow-auto min-w-0">
-          <Editor 
+          <PlateEditor 
             documentId={currentDocumentId}
             initialContent={initialContentState}
             onContentChange={handleContentChange}

@@ -10,6 +10,8 @@ import { useTheme } from "next-themes"
 import { supabase } from '@/lib/supabase-client';
 import { useRouter } from 'next/navigation';
 import { formatLastUpdated } from "@/utils/date-formatter"
+import { PlateEditor } from "./editor/plate-editor"
+import { SettingsProvider } from "./editor/settings"
 
 interface ResearchAssistantProps {
   initialDocumentId?: string | null;
@@ -211,11 +213,9 @@ export function ResearchAssistant({
         </header>
 
         <main className="flex-1 overflow-auto min-w-0">
-          <Editor 
-            documentId={currentDocumentId}
-            initialContent={initialContentState}
-            onContentChange={handleContentChange}
-          />
+          <SettingsProvider>
+            <PlateEditor initialContent={initialContentState} />
+          </SettingsProvider>
         </main>
       </div>
 

@@ -19,16 +19,34 @@ export type PlateEditorProps = {
 
 export function PlateEditor({ initialContent, docId }: PlateEditorProps) {
   const editor = useCreateEditor()
-  if (initialContent) {
+  
+  // Set initial content with proper validation
+  React.useMemo(() => {
     try {
-      editor.children = initialContent 
+      if (initialContent && Array.isArray(initialContent)) {
+        editor.children = initialContent
+      } else {
+        editor.children = [{ type: 'p', children: [{ text: 'Start writing here...' }] }]
+      }
     } catch (error) {
       console.error('Error setting initial content:', error)
       editor.children = [{ type: 'p', children: [{ text: 'Start writing here...' }] }]
     }
-  } else {
-    editor.children = [{ type: 'p', children: [{ text: 'Start writing here...' }] }]
-  }
+  }, [editor])
+
+  // Use useEffect to handle updates to initialContent
+  React.useEffect(() => {
+    try {
+      if (initialContent && Array.isArray(initialContent)) {
+        // Only update if the content is different
+        if (JSON.stringify(editor.children) !== JSON.stringify(initialContent)) {
+          editor.children = initialContent
+        }
+      }
+    } catch (error) {
+      console.error('Error updating content:', error)
+    }
+  }, [initialContent])
 
   const handleChange = useCallback(async () => {
     const contentText = JSON.stringify(editor.children) 

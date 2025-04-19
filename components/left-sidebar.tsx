@@ -142,7 +142,6 @@ export function LeftSidebar() {
                     ))
                   )}
                 </SidebarMenu>
-                <FileUploader />
               </SidebarGroupContent>
             </CollapsibleContent>
           </SidebarGroup>
@@ -158,6 +157,7 @@ export function LeftSidebar() {
             </SidebarGroupLabel>
             <CollapsibleContent>
               <ReferenceManager />
+              <FileUploader />
             </CollapsibleContent>
           </SidebarGroup>
         </Collapsible>

@@ -10,6 +10,8 @@ import { useTheme } from "next-themes"
 import { supabase } from '@/lib/supabase-client';
 import { useRouter } from 'next/navigation';
 import { formatLastUpdated } from "@/utils/date-formatter"
+import { PlateEditor } from "./editor/plate-editor"
+import { SettingsProvider } from "./editor/settings"
 
 interface ResearchAssistantProps {
   initialDocumentId?: string | null;
@@ -19,8 +21,7 @@ interface ResearchAssistantProps {
 }
 
 export function ResearchAssistant({ 
-  initialDocumentId, 
-  initialContent, 
+  initialDocumentId,
   initialTitle,
   lastUpdatedAt 
 }: ResearchAssistantProps) {
@@ -29,7 +30,6 @@ export function ResearchAssistant({
   const [rightSidebarOpen, setRightSidebarOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
   const [currentDocumentId, setCurrentDocumentId] = useState<string | null>(initialDocumentId || null);
-  const [initialContentState, setInitialContent] = useState<string>(initialContent || '');
   const [documentTitle, setDocumentTitle] = useState<string>(initialTitle || 'Untitled Document');
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [tempTitle, setTempTitle] = useState(documentTitle);
@@ -42,27 +42,36 @@ export function ResearchAssistant({
     setMounted(true)
   }, [])
 
-  // Fetch document content when initialDocumentId changes
-  useEffect(() => {
-    const fetchDocumentContent = async () => {
-      if (initialDocumentId) {
-        const { data, error } = await supabase
-          .from('research_documents')
-          .select('content, title, updated_at')
-          .eq('id', initialDocumentId)
-          .single();
+type TElement = { type: string; children: { text: string }[] }
 
-        if (!error && data) {
-          setInitialContent(data.content);
-          setDocumentTitle(data.title || 'Untitled Document');
-          setCurrentDocumentId(initialDocumentId);
-          setLastUpdated(data.updated_at || new Date().toISOString());
-        }
+const [initialContent, setInitialContent] = useState<TElement[]>([])
+const [loading, setLoading] = useState(true)
+
+useEffect(() => {
+  const fetchContent = async () => {
+    const { data, error } = await supabase
+      .from('research_documents')
+      .select('content')
+      .eq('id', initialDocumentId)
+      .single()
+
+    if (error) {
+      console.error('Error fetching document:', error)
+      setInitialContent([])
+    } else {
+      try {
+        setInitialContent(data?.content ? JSON.parse(data.content) : [{ type: 'p', children: [{ text: '' }] }])
+      } catch (err) {
+        console.error('Error parsing document content:', err)
+        setInitialContent([{ type: 'p', children: [{ text: '' }] }])
       }
-    };
+    }
 
-    fetchDocumentContent();
-  }, [initialDocumentId]);
+    setLoading(false)
+  }
+
+  fetchContent()
+}, [initialDocumentId])
 
   const toggleLeftSidebar = () => {
     setLeftSidebarOpen(!leftSidebarOpen)
@@ -76,24 +85,6 @@ export function ResearchAssistant({
     setTheme(theme === "dark" ? "light" : "dark")
   }
 
-  const handleContentChange = async (content: string) => {
-    if (currentDocumentId) {
-      if (debounceTimeout.current) {
-        clearTimeout(debounceTimeout.current);
-      }
-      
-      debounceTimeout.current = setTimeout(async () => {
-        const { data, error } = await supabase
-          .from('research_documents')
-          .update({ content, updated_at: new Date().toISOString() })
-          .eq('id', currentDocumentId);
-
-        if (!error && data) {
-          setLastUpdated(new Date().toISOString());
-        }
-      }, 2000);
-    }
-  };
 
   const handleTitleChange = async (newTitle: string) => {
     if (currentDocumentId) {
@@ -211,11 +202,9 @@ export function ResearchAssistant({
         </header>
 
         <main className="flex-1 overflow-auto min-w-0">
-          <Editor 
-            documentId={currentDocumentId}
-            initialContent={initialContentState}
-            onContentChange={handleContentChange}
-          />
+          <SettingsProvider>
+            <PlateEditor initialContent={initialContent} docId={currentDocumentId || ''} />
+          </SettingsProvider>
         </main>
       </div>
 

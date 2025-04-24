@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   SidebarContent,
   SidebarHeader,
@@ -41,7 +41,7 @@ export function LeftSidebar() {
   const [documents, setDocuments] = useState<{ id: string; title: string }[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const storedUser = JSON.parse(localStorage.getItem('user') || 'null');
+  const storedUser = useMemo(() => JSON.parse(localStorage.getItem('user') || 'null'), []);
   const pathname = usePathname();
   const currentDocumentId = pathname.split('/')[2];
   
@@ -63,7 +63,7 @@ export function LeftSidebar() {
     if (storedUser?.id) {
       fetchDocuments();
     }
-  }, [storedUser]);
+  }, [storedUser?.id]);
 
   return (
     <div className="h-full flex flex-col">
@@ -78,8 +78,8 @@ export function LeftSidebar() {
             </AvatarFallback>
           </Avatar>
           <div className="flex flex-col items-start">
-            <span className="text-sm font-medium">
-              {storedUser.email}
+            <span className="text-sm font-medium max-w-[160px] overflow-hidden whitespace-nowrap">
+              {storedUser.email.length > 20 ? `${storedUser.email.slice(0, 20)}...` : storedUser.email}
             </span>
             <Button
               variant="link"

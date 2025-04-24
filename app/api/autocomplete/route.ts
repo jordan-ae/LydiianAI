@@ -27,7 +27,6 @@ export const maxDuration = 30;
 
 export async function POST(req: Request) {
   const { text }: { text: string } = await req.json();
-  console.log(text)
 
   const result = await streamText({
     model: openai('gpt-3.5-turbo'),
@@ -41,8 +40,6 @@ export async function POST(req: Request) {
     temperature: 0.5,
     maxTokens: 50
   });
-
-  console.log(result)
 
   return result.toDataStreamResponse();
 }

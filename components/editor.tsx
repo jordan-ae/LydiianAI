@@ -285,8 +285,6 @@ export function Editor({ documentId, initialContent, onContentChange }: EditorPr
     )
   }
 
-  console.log(editor.getHTML())
-
   return (
     <div className="notion-editor w-full max-w-4xl mx-auto">
       <div ref={editorRef} className="relative pl-14 sm:pl-0">

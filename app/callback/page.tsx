@@ -43,7 +43,6 @@ export default function CallbackPage() {
           })
 
           const redirectUrl = process.env.NEXT_PUBLIC_REDIRECT_URL;
-          console.log(redirectUrl)
           if (!redirectUrl) {
             console.warn("Redirect URL is not set, defaulting to home page.");
             router.push("/");

@@ -7,9 +7,8 @@ export default function Page() {
   return (
     <div className="h-screen w-full" data-registry="plate">
       <SettingsProvider>
-        <PlateEditor />
+        <PlateEditor docId="default-document" />
       </SettingsProvider>
-
       <Toaster />
     </div>
   );

@@ -188,7 +188,7 @@ export const useCreateEditor = (
         FixedToolbarPlugin,
         FloatingToolbarPlugin,
       ],
-      value: [
+      value: readOnly ? [
         {
           children: [{ text: 'Playground' }],
           type: 'h1',
@@ -203,7 +203,7 @@ export const useCreateEditor = (
           ],
           type: ParagraphPlugin.key,
         },
-      ],
+      ] : [],
       ...options,
     },
     deps

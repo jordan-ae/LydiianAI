@@ -39,8 +39,6 @@ export default function DocumentPage({
         return;
       }
 
-      console.log(allDocs); 
-
       setUserDocuments(allDocs || []);
       
       if (!singleDoc && allDocs?.length > 0) {

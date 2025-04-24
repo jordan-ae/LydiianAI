@@ -67,7 +67,7 @@ export default function LoginPage() {
         },
       })
 
-      console.log(window.location.origin)
+      (window.location.origin)
       
       toast({
         title: "Redirecting",

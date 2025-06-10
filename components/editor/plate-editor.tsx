@@ -1,6 +1,5 @@
 'use client'
-
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState, useMemo } from 'react'
 import { DndProvider } from 'react-dnd'
 import { HTML5Backend } from 'react-dnd-html5-backend'
 import { useCreateEditor } from './use-create-editor'
@@ -17,42 +16,77 @@ export type PlateEditorProps = {
 }
 
 export function PlateEditor({ initialContent, docId }: PlateEditorProps) {
-  const editor = useCreateEditor()
+  const [isMounted, setIsMounted] = useState(false)
   const [isReady, setIsReady] = useState(false)
+  const [content, setContent] = useState<Value | null>(null)
+  
+  // Create editor only once and memoize it
+  const editor = useCreateEditor()
+  
+  // Debounce content changes
+  const debouncedContent = useDebounce(content, 1000)
 
+  // Handle mounting
   useEffect(() => {
-    if (!editor) return
+    setIsMounted(true)
+  }, [])
 
-    if (initialContent) {
-      editor.children = initialContent
-    } else {
-      editor.children = [{ type: 'p', children: [{ text: 'Type a paragraph' }] }]
+  // Initialize editor content
+  useEffect(() => {
+    if (!editor || !isMounted) return
+    
+    try {
+      const defaultContent = [{ type: 'p', children: [{ text: 'Type a paragraph' }] }]
+      const editorContent = initialContent || defaultContent
+      
+      editor.children = editorContent
+      setContent(editorContent)
+      setIsReady(true)
+    } catch (error) {
+      console.error('Error initializing editor:', error)
     }
+  }, [editor, initialContent, isMounted])
 
-    setIsReady(true)
-  }, [editor, initialContent])
-
-  const debouncedHandleChange = useDebounce(async () => {
-    if (!editor || !isReady) return
-
-    const contentText = JSON.stringify(editor.children) 
-
-    const { error } = await supabase
-      .from('research_documents')
-      .update({ content: contentText })
-      .eq('id', docId)
-
-    if (error) {
-      console.error('Error saving content:', error)
+  // Save debounced content
+  useEffect(() => {
+    if (!debouncedContent || !isMounted) return
+    
+    const saveContent = async () => {
+      try {
+        const contentText = JSON.stringify(debouncedContent)
+        const { error } = await supabase
+          .from('research_documents')
+          .update({ content: contentText })
+          .eq('id', docId)
+        
+        if (error) {
+          console.error('Error saving content:', error)
+        }
+      } catch (error) {
+        console.error('Error saving content:', error)
+      }
     }
-  }, 300) // Debounce for 300ms
+    
+    saveContent()
+  }, [debouncedContent, docId, isMounted])
 
   const handleChange = useCallback(() => {
-    debouncedHandleChange()
-  }, [debouncedHandleChange])
+    if (!editor || !isMounted) return
+    
+    try {
+      setContent([...editor.children])
+    } catch (error) {
+      console.error('Error in handleChange:', error)
+    }
+  }, [editor, isMounted])
 
-  if (!isReady || !editor) {
-    return null
+  // Don't render anything until mounted and ready
+  if (!isMounted || !isReady || !editor) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="text-gray-500">Loading editor...</div>
+      </div>
+    )
   }
 
   return (

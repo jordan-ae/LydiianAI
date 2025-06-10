@@ -5,6 +5,7 @@ import { useTheme } from "next-themes"
 import { useEffect, useState } from "react"
 import Sidebar from "./sidebar"
 import TopNav from "./top-nav"
+import Filters from "./filters"
 
 interface LayoutProps {
   children: ReactNode
@@ -23,7 +24,7 @@ export default function Layout({ children }: LayoutProps) {
   }
 
   return (
-    <div className={`flex h-screen ${theme === "dark" ? "dark" : ""}`}>
+    <div className={`flex w-screen h-screen ${theme === "dark" ? "dark" : ""}`}>
       <Sidebar />
       <div className="w-full flex flex-1 flex-col">
         <header className="h-16 border-b border-gray-200 dark:border-[#1F1F23]">

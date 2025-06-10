@@ -1,21 +1,27 @@
-import type React from "react"
-import { LogOut, MoveUpRight, Settings, CreditCard, FileText } from "lucide-react"
-import Image from "next/image"
-import Link from "next/link"
+import type React from "react";
+import {
+  LogOut,
+  MoveUpRight,
+  Settings,
+  CreditCard,
+  FileText,
+} from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
 
 interface MenuItem {
-  label: string
-  value?: string
-  href: string
-  icon?: React.ReactNode
-  external?: boolean
+  label: string;
+  value?: string;
+  href: string;
+  icon?: React.ReactNode;
+  external?: boolean;
 }
 
 interface UserProfileProps {
-  name?: string
-  role?: string
-  avatar?: string
-  plan?: string
+  name?: string;
+  role?: string;
+  avatar?: string;
+  plan?: string;
 }
 
 export default function UserProfile({
@@ -43,7 +49,7 @@ export default function UserProfile({
       icon: <FileText className="w-4 h-4" />,
       external: true,
     },
-  ]
+  ];
 
   return (
     <div className="w-full max-w-sm mx-auto">
@@ -63,7 +69,9 @@ export default function UserProfile({
 
             {/* Profile Info */}
             <div className="flex-1">
-              <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">{name}</h2>
+              <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
+                {name}
+              </h2>
               <p className="text-zinc-600 dark:text-zinc-400">{role}</p>
             </div>
           </div>
@@ -79,10 +87,16 @@ export default function UserProfile({
               >
                 <div className="flex items-center gap-2">
                   {item.icon}
-                  <span className="text-sm font-medium text-zinc-900 dark:text-zinc-100">{item.label}</span>
+                  <span className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
+                    {item.label}
+                  </span>
                 </div>
                 <div className="flex items-center">
-                  {item.value && <span className="text-sm text-zinc-500 dark:text-zinc-400 mr-2">{item.value}</span>}
+                  {item.value && (
+                    <span className="text-sm text-zinc-500 dark:text-zinc-400 mr-2">
+                      {item.value}
+                    </span>
+                  )}
                   {item.external && <MoveUpRight className="w-4 h-4" />}
                 </div>
               </Link>
@@ -96,12 +110,14 @@ export default function UserProfile({
             >
               <div className="flex items-center gap-2">
                 <LogOut className="w-4 h-4" />
-                <span className="text-sm font-medium text-zinc-900 dark:text-zinc-100">Logout</span>
+                <span className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
+                  Logout
+                </span>
               </div>
             </button>
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }

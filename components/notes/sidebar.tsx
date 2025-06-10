@@ -1,52 +1,70 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
 import {
-  BarChart2,
-  FileText,
-  Network,
   FileUp,
   Users2,
   Settings,
   HelpCircle,
   Menu,
-  Home,
   FilePlus2,
-  BrainCircuit,
   Lightbulb,
-  Bookmark,
-} from "lucide-react"
+  Notebook,
+  Boxes,
+  MessageSquare,
+  Star,
+} from "lucide-react";
 
-import Link from "next/link"
-import { useState } from "react"
+import Link from "next/link";
+import { useState, useEffect } from "react";
 
 export default function Sidebar() {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      setIsDarkMode(document.documentElement.classList.contains('dark'));
+    });
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class'],
+    });
+
+    return () => observer.disconnect();
+  }, []);
 
   function handleNavigation() {
-    setIsMobileMenuOpen(false)
+    setIsMobileMenuOpen(false);
   }
 
   function NavItem({
     href,
     icon: Icon,
     children,
+    active,
   }: {
-    href: string
-    icon: any
-    children: React.ReactNode
+    href: string;
+    icon: any;
+    children: React.ReactNode;
+    active?: boolean;
   }) {
     return (
       <Link
         href={href}
         onClick={handleNavigation}
-        className="flex items-center px-3 py-2 text-sm rounded-md transition-colors text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-[#1F1F23]"
+        className={`flex items-center px-3 py-2 text-sm rounded-md transition-colors ${
+          active
+            ? "text-gray-900 dark:text-white bg-gray-100 dark:bg-[#1F1F23]"
+            : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-[#1F1F23]"
+        }`}
       >
         <Icon className="h-4 w-4 mr-3 flex-shrink-0" />
         {children}
       </Link>
-    )
+    );
   }
 
   return (
@@ -67,9 +85,14 @@ export default function Sidebar() {
       >
         <div className="h-full flex flex-col">
           <div className="h-16 px-6 flex items-center border-b border-gray-200 dark:border-[#1F1F23]">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-md flex items-center justify-center">
-                <img src="logowhitet.png" alt="logo" width={30} height={30}/>
+                <img 
+                  src={isDarkMode ? 'logowhitet.png' : 'logoblackt.png'}
+                  alt="logo" 
+                  width={25} 
+                  height={25} 
+                />
               </div>
               <span className="text-lg font-semibold hover:cursor-pointer text-gray-900 dark:text-white">
                 Lydian AI
@@ -84,17 +107,17 @@ export default function Sidebar() {
                   Main
                 </div>
                 <div className="space-y-1">
-                  <NavItem href="#" icon={Home}>
-                    Dashboard
+                  <NavItem href="#" icon={Notebook} active={true}>
+                    Notes
                   </NavItem>
-                  <NavItem href="#" icon={Network}>
-                    My Networks
+                  <NavItem href="#" icon={Boxes}>
+                    Collections
                   </NavItem>
-                  <NavItem href="#" icon={FileText}>
-                    Documents
+                  <NavItem href="#" icon={MessageSquare}>
+                    Chat
                   </NavItem>
-                  <NavItem href="#" icon={Bookmark}>
-                    Bookmarks
+                  <NavItem href="#" icon={Star}>
+                    Favourites
                   </NavItem>
                 </div>
               </div>
@@ -118,12 +141,9 @@ export default function Sidebar() {
 
               <div>
                 <div className="px-3 mb-2 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                  Analytics
+                  Teams
                 </div>
                 <div className="space-y-1">
-                  <NavItem href="#" icon={BarChart2}>
-                    Research Stats
-                  </NavItem>
                   <NavItem href="#" icon={Users2}>
                     Collaborators
                   </NavItem>
@@ -151,5 +171,5 @@ export default function Sidebar() {
         />
       )}
     </>
-  )
+  );
 }

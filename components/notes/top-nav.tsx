@@ -17,7 +17,7 @@ interface BreadcrumbItem {
 export default function TopNav() {
   const breadcrumbs: BreadcrumbItem[] = [
     { label: "lydian", href: "#" },
-    { label: "Dashboard", href: "#" },
+    { label: "Notes", href: "#" },
   ]
 
   const { theme, setTheme } = useTheme()

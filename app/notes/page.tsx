@@ -1,7 +1,7 @@
 // 'use client'
 
-import DashboardContent from "@/components/home/components/content";
-import Layout from "@/components/home/components/layout";
+import DashboardContent from "@/components/notes/content";
+import Layout from "@/components/notes/layout";
 
 // import VisConceptGraph from '@/components/concept-graph/concept-graph';
 // import { useState } from 'react';

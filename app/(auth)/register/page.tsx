@@ -74,7 +74,7 @@ export default function RegisterPage() {
       });
 
       setTimeout(() => {
-        router.push("/");
+        router.push("/notes");
       }, 2000);
     } catch (error: any) {
       let errorMessage = "Failed to register. Please try again.";

@@ -44,7 +44,7 @@ export default function LoginPage() {
         description: "You have successfully logged in.",
       })
 
-      router.push("/")
+      router.push("/notes")
     } catch (error) {
       toast({
         title: "Error",

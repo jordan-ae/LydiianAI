@@ -186,7 +186,7 @@ export default function RecentDocuments(documents: IDocs) {
       {categorizedDocuments.older.length > 0 && (
         <div>
           <div className="flex items-center justify-between mb-2 mt-4">
-            <h2 className="ffont-semibold text-base text-gray-900 dark:text-slate-400 flex items-center gap-2">
+            <h2 className="font-semibold text-base text-gray-900 dark:text-slate-400 flex items-center gap-2">
               Older
             </h2>
           </div>

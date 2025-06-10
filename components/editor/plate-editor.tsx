@@ -32,8 +32,8 @@ export function PlateEditor({ initialContent, docId }: PlateEditorProps) {
     setIsReady(true)
   }, [editor, initialContent])
 
-  const handleChange = useCallback(async () => {
-    if (!editor) return
+  const debouncedHandleChange = useDebounce(async () => {
+    if (!editor || !isReady) return
 
     const contentText = JSON.stringify(editor.children) 
 
@@ -45,7 +45,11 @@ export function PlateEditor({ initialContent, docId }: PlateEditorProps) {
     if (error) {
       console.error('Error saving content:', error)
     }
-  }, [editor, docId])
+  }, 300) // Debounce for 300ms
+
+  const handleChange = useCallback(() => {
+    debouncedHandleChange()
+  }, [debouncedHandleChange])
 
   if (!isReady || !editor) {
     return null

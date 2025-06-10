@@ -28,10 +28,11 @@ export function PlateEditor({ initialContent, docId }: PlateEditorProps) {
   }
 
   const editor = useCreateEditor()
-
   const [isReady, setIsReady] = useState(false)
 
   useEffect(() => {
+    if (!editor) return
+
     if (initialContent) {
       editor.children = initialContent
     } else {
@@ -41,7 +42,9 @@ export function PlateEditor({ initialContent, docId }: PlateEditorProps) {
     setIsReady(true)
   }, [editor, initialContent])
 
-  const handleChange = useCallback(useDebounce(async () => {
+  const handleChange = useCallback(async () => {
+    if (!editor) return
+
     const contentText = JSON.stringify(editor.children) 
 
     const { error } = await supabase
@@ -52,9 +55,9 @@ export function PlateEditor({ initialContent, docId }: PlateEditorProps) {
     if (error) {
       console.error('Error saving content:', error)
     }
-  }, 500), [editor.children, docId])
+  }, [editor, docId])
 
-  if (!isReady) {
+  if (!isReady || !editor) {
     return null
   }
 

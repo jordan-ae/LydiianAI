@@ -17,16 +17,6 @@ export type PlateEditorProps = {
 }
 
 export function PlateEditor({ initialContent, docId }: PlateEditorProps) {
-  const [isMounted, setIsMounted] = useState(false)
-
-  useEffect(() => {
-    setIsMounted(true)
-  }, [])
-
-  if (!isMounted) {
-    return null
-  }
-
   const editor = useCreateEditor()
   const [isReady, setIsReady] = useState(false)
 

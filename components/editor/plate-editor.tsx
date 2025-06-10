@@ -9,6 +9,7 @@ import { Editor, EditorContainer } from '../plate-ui/editor'
 import { SettingsDialog } from './settings'
 import { supabase } from '@/lib/supabase-client'
 import { Value } from '@udecode/plate'
+import { useDebounce } from '@/hooks/use-debounce'
 
 export type PlateEditorProps = {
   initialContent?: Value
@@ -16,6 +17,16 @@ export type PlateEditorProps = {
 }
 
 export function PlateEditor({ initialContent, docId }: PlateEditorProps) {
+  const [isMounted, setIsMounted] = useState(false)
+
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
+  if (!isMounted) {
+    return null
+  }
+
   const editor = useCreateEditor()
 
   const [isReady, setIsReady] = useState(false)
@@ -30,7 +41,7 @@ export function PlateEditor({ initialContent, docId }: PlateEditorProps) {
     setIsReady(true)
   }, [editor, initialContent])
 
-  const handleChange = useCallback(async () => {
+  const handleChange = useCallback(useDebounce(async () => {
     const contentText = JSON.stringify(editor.children) 
 
     const { error } = await supabase
@@ -41,7 +52,7 @@ export function PlateEditor({ initialContent, docId }: PlateEditorProps) {
     if (error) {
       console.error('Error saving content:', error)
     }
-  }, [editor.children, docId])
+  }, 500), [editor.children, docId])
 
   if (!isReady) {
     return null

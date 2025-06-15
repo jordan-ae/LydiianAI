@@ -17,16 +17,5 @@
     "lib": "@/lib",
     "hooks": "@/hooks"
   },
-  "iconLibrary": "lucide",
-  "registries": {
-    "plate": {
-      "tailwind": {
-        "baseColor": "gray"
-      },
-      "aliases": {
-        "ui": "@/components/plate-ui"
-      },
-      "url": "https://platejs.org/r"
-    }
-  }
+  "iconLibrary": "lucide"
 }

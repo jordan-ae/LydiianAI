@@ -122,7 +122,9 @@ const config = {
   			],
   			mono: [
   				'var(--font-mono)',
-  				...require("tailwindcss/defaultTheme").fontFamily.mono
+                    ...require(
+                    'tailwindcss/defaultTheme',
+  				).fontFamily.mono
   			],
   			sans: [
   				'var(--font-sans)',

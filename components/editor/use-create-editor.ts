@@ -185,7 +185,7 @@ export const useCreateEditor = (
       plugins: [
         ...copilotPlugins,
         ...editorPlugins,
-        FixedToolbarPlugin,
+        // FixedToolbarPlugin,
         FloatingToolbarPlugin,
       ],
       value: readOnly ? [

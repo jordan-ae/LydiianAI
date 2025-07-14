@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Editor } from "@/components/editor";
+
 import { LeftSidebar } from "@/components/left-sidebar";
 import { RightSidebar } from "@/components/right-sidebar";
 import { Button } from "@/components/ui/button";
@@ -16,7 +16,6 @@ import {
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { supabase } from "@/lib/supabase-client";
-import { useRouter } from "next/navigation";
 import { formatLastUpdated } from "@/utils/date-formatter";
 import { PlateEditor } from "./editor/plate-editor";
 import { SettingsProvider } from "./editor/settings";
@@ -164,7 +163,7 @@ export function ResearchAssistant({
       </div>
 
       <div className="flex-1 flex flex-col relative min-w-0">
-        <header className="flex items-center justify-between p-4">
+        <header className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Button
               variant="ghost"
